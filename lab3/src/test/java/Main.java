@@ -1,9 +1,12 @@
-import lab.model.Message;
-import lab.model.simple.SimpleMessage;
+import lab.model.Country;
+import lab.model.Person;
+import lab.model.UsualPerson;
 import lombok.experimental.FieldDefaults;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.junit.After;
+import org.junit.Before;
+import  org.junit.Test;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,20 +14,34 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @FieldDefaults(level = PRIVATE)
 public class Main {
 
-    static final String APPLICATION_CONTEXT_XML_FILE_NAME = "ioc.xml";
+    static final String APPLICATION_CONTEXT_XML_FILE_NAME = "src/test/resources/ioc.xml";
 
-    private BeanFactory context = new ClassPathXmlApplicationContext(
-            APPLICATION_CONTEXT_XML_FILE_NAME);
+    UsualPerson expectedPerson;
 
-    @Test
-    void testInitPerson() {
-        Message message = context.getBean("message", Message.class);
-        assertEquals(getExpectedMessage(), message);
+    AbstractApplicationContext context;
+
+    @Before
+    public void setUp() throws Exception {
+        context = new FileSystemXmlApplicationContext(
+                new String[] { APPLICATION_CONTEXT_XML_FILE_NAME });
+        expectedPerson = getExpectedPerson();
     }
 
-    private Message getExpectedMessage() {
-        return SimpleMessage.builder()
-                .message("Hello, world")
-                .build();
+    @Test
+    public void testInitPerson() {
+        UsualPerson person = (UsualPerson) context.getBean("person", Person.class);
+        assertEquals(expectedPerson, person);
+        System.out.println(person);
+    }
+
+    private UsualPerson getExpectedPerson() {
+        Country country = Country.builder().id(1).name("Russia").codeName("RU").build();
+        return  UsualPerson.builder().name("John Smith").age(35).country(country).build();
+    }
+
+    @After
+    public void tearDown() throws Exception{
+        if (context != null)
+            context.close();
     }
 }
