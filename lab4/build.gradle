@@ -1,0 +1,64 @@
+group 'com.epam.spring'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+configurations {
+    testCompile.extendsFrom compileOnly
+}
+
+// turn sout`ing on in tests:
+test.testLogging.showStandardStreams = true
+
+repositories {
+
+    flatDir { dirs './lib' } // for local libs
+
+    mavenLocal()
+    mavenCentral()
+    jcenter() // BinTray
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+test {
+    useJUnitPlatform {
+        // includeTags 'fast'
+        excludeTags 'slow'
+        // includeEngines 'junit-jupiter', 'junit-vintage'
+        // excludeEngines 'custom-engine'
+    }
+}
+
+dependencies {
+    compile 'org.springframework:spring-context:+',
+
+            // todo: insert additional dependencies here
+
+            // Commons
+            'org.apache.logging.log4j:log4j-slf4j-impl:+'
+
+    compileOnly ':lombok-edge:',
+            'edu.washington.cs.types.checker:checker-framework:+'
+
+     testCompile 'org.hamcrest:java-hamcrest:+',
+            'org.mockito:mockito-core:+',
+            'org.springframework:spring-test:+',
+            'junit:junit:4.12'
+
+    // To avoid compiler warnings about @API annotations in JUnit code
+    testCompileOnly 'org.apiguardian:apiguardian-api:+'
+}
+
+// type in terminal: gradle wrapper --gradle-version=4.6
+task wrapper(type: Wrapper) {
+    description = 'Generates gradlew[.bat] scripts'
+    gradleVersion = '4.6'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
